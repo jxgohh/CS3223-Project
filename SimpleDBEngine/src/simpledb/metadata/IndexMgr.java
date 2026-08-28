@@ -27,6 +27,7 @@ class IndexMgr {
       if (isnew) {
          Schema sch = new Schema();
          sch.addStringField("indexname", MAX_NAME);
+         sch.addStringField("indextype", MAX_NAME);
          sch.addStringField("tablename", MAX_NAME);
          sch.addStringField("fieldname", MAX_NAME);
          tblmgr.createTable("idxcat", sch, tx);
@@ -45,12 +46,13 @@ class IndexMgr {
     * @param fldname the name of the indexed field
     * @param tx the calling transaction
     */
-   public void createIndex(String idxname, String tblname, String fldname, Transaction tx) {
+   public void createIndex(String idxname, String idxtype, String tblname, String fldname, Transaction tx) {
       TableScan ts = new TableScan(tx, "idxcat", layout);
       ts.insert();
       ts.setString("indexname", idxname);
       ts.setString("tablename", tblname);
       ts.setString("fieldname", fldname);
+      ts.setString("indextype", idxtype);
       ts.close();
    }
    
@@ -67,10 +69,11 @@ class IndexMgr {
       while (ts.next())
          if (ts.getString("tablename").equals(tblname)) {
          String idxname = ts.getString("indexname");
+         String idxtype = ts.getString("indextype");
          String fldname = ts.getString("fieldname");
          Layout tblLayout = tblmgr.getLayout(tblname, tx);
          StatInfo tblsi = statmgr.getStatInfo(tblname, tblLayout, tx);
-         IndexInfo ii = new IndexInfo(idxname, fldname, tblLayout.schema(), tx, tblsi);
+         IndexInfo ii = new IndexInfo(idxname, idxtype, fldname, tblLayout.schema(), tx, tblsi);
          result.put(fldname, ii);
       }
       ts.close();

@@ -235,13 +235,15 @@ public class Parser {
    
    public CreateIndexData createIndex() {
       lex.eatKeyword("index");
+      lex.eatKeyword("using");
+      String idxtype = lex.eatId();
       String idxname = lex.eatId();
       lex.eatKeyword("on");
       String tblname = lex.eatId();
       lex.eatDelim('(');
       String fldname = field();
       lex.eatDelim(')');
-      return new CreateIndexData(idxname, tblname, fldname);
+      return new CreateIndexData(idxname, idxtype, tblname, fldname);
    }
 }
 
