@@ -11,14 +11,16 @@ import simpledb.query.*;
 public class QueryData {
    private List<String> fields;
    private Collection<String> tables;
+   private List<String> orders;
    private Predicate pred;
    
    /**
     * Saves the field and table list and predicate.
     */
-   public QueryData(List<String> fields, Collection<String> tables, Predicate pred) {
+   public QueryData(List<String> fields, Collection<String> tables, List<String> orders, Predicate pred) {
       this.fields = fields;
       this.tables = tables;
+      this.orders = orders;
       this.pred = pred;
    }
    
@@ -47,6 +49,10 @@ public class QueryData {
       return pred;
    }
    
+   public List<String> orders() {
+	   return orders;
+   }
+   
    public String toString() {
       String result = "select ";
       for (String fldname : fields)
@@ -59,6 +65,12 @@ public class QueryData {
       String predstring = pred.toString();
       if (!predstring.equals(""))
          result += " where " + predstring;
+      if (!orders.isEmpty()) {
+    	  result += " order by ";
+    	  for (String ordernames : orders)
+    		  result += ordernames + ", ";
+    	  result = result.substring(0, result.length()-2); //remove final comma
+      }
       return result;
    }
 }
