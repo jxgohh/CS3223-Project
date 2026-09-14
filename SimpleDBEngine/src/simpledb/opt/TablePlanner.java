@@ -5,6 +5,7 @@ import simpledb.tx.Transaction;
 import simpledb.record.*;
 import simpledb.query.*;
 import simpledb.metadata.*;
+import simpledb.materialize.*;
 import simpledb.index.planner.*;
 import simpledb.multibuffer.MultibufferProductPlan;
 import simpledb.plan.*;
@@ -66,7 +67,9 @@ class TablePlanner {
          return null;
       Plan p = makeIndexJoin(current, currsch);
       if (p == null)
-         p = makeProductJoin(current, currsch);
+         p = makeMergeJoin(current, currsch);
+      if (p == null) 
+    	  p = makeNestedLoopJoin(current, currsch);
       return p;
    }
    
@@ -79,6 +82,18 @@ class TablePlanner {
    public Plan makeProductPlan(Plan current) {
       Plan p = addSelectPred(myplan);
       return new MultibufferProductPlan(tx, current, p);
+   }
+   
+   private Plan makeNestedLoopJoin(Plan current, Schema currsch) {
+	   Predicate joinpred = mypred.joinSubPred(myschema, currsch);
+	   
+	   if (joinpred == null)
+		   return null;
+	   
+	   Plan p = new NestedLoopJoinPlan(current, myplan, joinpred);
+	   
+	   return addSelectPred(p);
+	   
    }
    
    private Plan makeIndexSelect() {
@@ -111,6 +126,7 @@ class TablePlanner {
       return addJoinPred(p, currsch);
    }
    
+   
    private Plan addSelectPred(Plan p) {
       Predicate selectpred = mypred.selectSubPred(myschema);
       if (selectpred != null)
@@ -126,4 +142,28 @@ class TablePlanner {
       else
          return p;
    }
+   
+   private Plan makeMergeJoin(Plan current, Schema currsch) {
+	   Predicate joinpred = mypred.joinSubPred(myschema, currsch);
+	   for (String myfield : myschema.fields()) {
+	      String outerfield = joinpred.equatesWithField(myfield);
+	      if (outerfield != null && currsch.hasField(outerfield)) {
+
+	         System.out.println(
+	            "Merge join: current." + outerfield +
+	            " = table." + myfield
+	         );
+
+	         return new MergeJoinPlan(
+	            tx,
+	            current,
+	            myplan,
+	            outerfield,
+	            myfield
+	         );
+	      }
+	   }
+
+	   return null;
+	}
 }
