@@ -34,7 +34,13 @@ public class GroupByPlan implements Plan {
       for (String fldname : groupfields)
          sch.add(fldname, p.schema());
       for (AggregationFn fn : aggfns)
-         sch.addIntField(fn.fieldName());
+    	  if (fn instanceof MaxFn || fn instanceof MinFn) {
+	          // min/max return a value of the underlying field's type (int or string)
+	          String src = fn.sourceField();
+	          sch.addField(fn.fieldName(), p.schema().type(src), p.schema().length(src));
+          } else
+	          // count, sum and avg always return an int
+	          sch.addIntField(fn.fieldName());
    }
    
    /**

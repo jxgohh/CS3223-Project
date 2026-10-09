@@ -34,4 +34,11 @@ public interface AggregationFn {
     * @return the computed aggregation value
     */
    Constant value();
+   
+   /**
+    * Return the name of the field being aggregated.
+    * For example, for max(sname) this returns "sname".
+    * @return the name of the underlying field
+    */
+   String sourceField();
 }

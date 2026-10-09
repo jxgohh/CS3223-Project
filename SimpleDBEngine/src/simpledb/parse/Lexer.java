@@ -66,6 +66,12 @@ public class Lexer {
       return tok.ttype == StreamTokenizer.TT_WORD && tok.sval.equals(w);
    }
    
+   
+   public boolean matchAggregate() {
+      return matchKeyword("sum") || matchKeyword("count") || matchKeyword("avg")
+            || matchKeyword("min") || matchKeyword("max");
+   }
+   
    /**
     * Returns true if the current token is a legal identifier.
     * @return true if the current token is an identifier
@@ -147,6 +153,14 @@ public class Lexer {
       nextToken();
    }
    
+   public String eatAggregate() {
+      if (!matchAggregate())
+         throw new BadSyntaxException();
+      String s = tok.sval;
+      nextToken();
+      return s;
+   }
+   
    /**
     * Throws an exception if the current token is not 
     * an identifier. 
@@ -175,6 +189,7 @@ public class Lexer {
       keywords = Arrays.asList("select", "from", "where", "and",
                                "insert", "into", "values", "delete", "update", "set", 
                                "create", "table", "int", "varchar", "view", "as", "index", 
-                               "using", "on", "asc", "desc", "order", "by");
+                               "using", "on", "asc", "desc", "order", "by",
+                               "group", "sum", "count", "avg", "min", "max");
    }
 }

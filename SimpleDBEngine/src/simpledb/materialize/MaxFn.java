@@ -53,4 +53,12 @@ public class MaxFn implements AggregationFn {
    public Constant value() {
       return val;
    }
+   
+   /**
+    * Return the name of the field being counted.
+    * @see simpledb.materialize.AggregationFn#sourceField()
+    */
+   public String sourceField() {
+      return fldname;
+   }
 }

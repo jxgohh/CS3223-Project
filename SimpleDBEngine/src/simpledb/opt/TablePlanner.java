@@ -67,6 +67,8 @@ class TablePlanner {
          return null;
       Plan p = makeIndexJoin(current, currsch);
       if (p == null)
+         p = makeHashJoin(current, currsch);
+      if (p == null)
          p = makeMergeJoin(current, currsch);
       if (p == null) 
     	  p = makeNestedLoopJoin(current, currsch);
@@ -166,4 +168,19 @@ class TablePlanner {
 
 	   return null;
 	}
+   
+   private Plan makeHashJoin(Plan current, Schema currsch) {
+      Predicate joinpred = mypred.joinSubPred(myschema, currsch);
+      if (joinpred == null)
+         return null;
+      for (String myfield : myschema.fields()) {
+         String outerfield = joinpred.equatesWithField(myfield);
+         if (outerfield != null && currsch.hasField(outerfield)) {
+            System.out.println("Hash join: current." + outerfield + " = table." + myfield);
+            Plan p = new HashJoinPlan(tx, current, addSelectPred(myplan), outerfield, myfield);
+            return addJoinPred(p, currsch);
+         }
+      }
+      return null;
+   }
 }

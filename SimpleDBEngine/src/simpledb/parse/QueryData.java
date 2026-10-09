@@ -3,6 +3,7 @@ package simpledb.parse;
 import java.util.*;
 
 import simpledb.query.*;
+import simpledb.materialize.AggregationFn;
 
 /**
  * Data for the SQL <i>select</i> statement.
@@ -13,15 +14,20 @@ public class QueryData {
    private Collection<String> tables;
    private List<String> orders;
    private Predicate pred;
+   private List<String> groupFields;
+   private List<AggregationFn> aggFns;
    
    /**
     * Saves the field and table list and predicate.
     */
-   public QueryData(List<String> fields, Collection<String> tables, List<String> orders, Predicate pred) {
+   public QueryData(List<String> fields, Collection<String> tables, List<String> orders, Predicate pred,
+		   List<String> groupFields, List<AggregationFn> aggFns) {
       this.fields = fields;
       this.tables = tables;
       this.orders = orders;
       this.pred = pred;
+      this.groupFields = groupFields;
+      this.aggFns = aggFns;
    }
    
    /**
@@ -51,6 +57,30 @@ public class QueryData {
    
    public List<String> orders() {
 	   return orders;
+   }
+   
+   /**
+   * Returns the fields mentioned in the group by clause.
+   * @return a list of field names (empty if no group by)
+   */
+   public List<String> groupFields() {
+      return groupFields;
+   }
+   
+   /**
+   * Returns the aggregate functions mentioned in the select clause.
+   * @return a list of aggregation functions (empty if none)
+   */
+   public List<AggregationFn> aggFns() {
+      return aggFns;
+   }
+   
+   /**
+    * Returns true if the query needs a group by operator,
+    * i.e. it has a group by clause or any aggregate function.
+    */
+   public boolean hasGroupBy() {
+      return !groupFields.isEmpty() || !aggFns.isEmpty();
    }
    
    public String toString() {

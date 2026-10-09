@@ -4,6 +4,12 @@ import java.util.*;
 
 import simpledb.query.*;
 import simpledb.record.*;
+import simpledb.materialize.AggregationFn;
+import simpledb.materialize.AvgFn;
+import simpledb.materialize.CountFn;
+import simpledb.materialize.MaxFn;
+import simpledb.materialize.MinFn;
+import simpledb.materialize.SumFn;
 
 /**
  * The SimpleDB parser.
@@ -54,10 +60,11 @@ public class Parser {
    }
    
 // Methods for parsing queries
-   
    public QueryData query() {
       lex.eatKeyword("select");
-      List<String> fields = selectList();
+      List<String> fields = new ArrayList<String>();
+      List<AggregationFn> aggFns = new ArrayList<AggregationFn>();
+      selectList(fields, aggFns);
       lex.eatKeyword("from");
       Collection<String> tables = tableList();
       Predicate pred = new Predicate();
@@ -65,27 +72,65 @@ public class Parser {
          lex.eatKeyword("where");
          pred = predicate();
       }
-      List<String> orders = new ArrayList<>();
       
-      if (lex.matchKeyword("order")) {
-    	  lex.eatKeyword("order");
-    	  lex.eatKeyword("by");
-    	  orders = orderList();	
+      List<String> groupFields = new ArrayList<String>();
+      if (lex.matchKeyword("group")) {
+         lex.eatKeyword("group");
+         lex.eatKeyword("by");
+         groupFields = fieldList();
       }
       
-      return new QueryData(fields, tables, orders, pred);
+      List<String> orders = new ArrayList<>();
+      if (lex.matchKeyword("order")) {
+        lex.eatKeyword("order");
+        lex.eatKeyword("by");
+        orders = orderList();  
+      }
+      
+      // with group by / aggregates, every non-aggregate select field
+      // must be a group by field
+      if (!groupFields.isEmpty() || !aggFns.isEmpty()) {
+         for (String fld : fields) {
+            boolean isAgg = false;
+            for (AggregationFn fn : aggFns)
+               if (fn.fieldName().equals(fld))
+                  isAgg = true;
+            if (!isAgg && !groupFields.contains(fld))
+               throw new BadSyntaxException();
+         }
+      }
+      
+      return new QueryData(fields, tables, orders, pred, groupFields, aggFns);
    }
    
-   private List<String> selectList() {
-      List<String> L = new ArrayList<String>();
-      L.add(field());
+   private void selectList(List<String> fields, List<AggregationFn> aggFns) {
+      if (lex.matchAggregate()) {
+         AggregationFn fn = aggregate();
+         aggFns.add(fn);
+         fields.add(fn.fieldName());   // e.g. "countofsid", so ProjectPlan keeps it
+      }
+      else
+         fields.add(field());
       if (lex.matchDelim(',')) {
          lex.eatDelim(',');
-         L.addAll(selectList());
+         selectList(fields, aggFns);
       }
-      return L;
    }
    
+   private AggregationFn aggregate() {
+      String fnName = lex.eatAggregate();
+      lex.eatDelim('(');
+      String fld = field();
+      lex.eatDelim(')');
+      switch (fnName) {
+         case "sum":   return new SumFn(fld);
+         case "count": return new CountFn(fld);
+         case "avg":   return new AvgFn(fld);
+         case "min":   return new MinFn(fld);
+         default:      return new MaxFn(fld);
+      }
+   }
+
    private Collection<String> tableList() {
       Collection<String> L = new ArrayList<String>();
       L.add(lex.eatId());
@@ -99,7 +144,7 @@ public class Parser {
    private List<String> orderList() {
 	   List<String> orders = new ArrayList<String>();
 
-	   String currField = field();
+	   String currField = lex.matchAggregate() ? aggregate().fieldName() : field();
 	   String direction = "asc"; // default
 
 	   if (lex.matchKeyword("asc")) {

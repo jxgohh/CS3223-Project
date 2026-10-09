@@ -47,11 +47,15 @@ public class HeuristicQueryPlanner implements QueryPlanner {
             currentplan = getLowestProductPlan(currentplan);
       }
       
-      if (!data.orders().isEmpty()) {
-    	   currentplan = new SortPlan(tx, currentplan, data.orders());
-    	}
+      // Step 4: Group by / aggregates (GroupByPlan sorts on the group fields internally)
+      if (data.hasGroupBy())
+         currentplan = new GroupByPlan(tx, currentplan, data.groupFields(), data.aggFns());
       
-      // Step 4.  Project on the field names and return
+      // Step 5: Order by
+      if (!data.orders().isEmpty())
+         currentplan = new SortPlan(tx, currentplan, data.orders());
+      
+      // Step 6: Project on the field names and return
       return new ProjectPlan(currentplan, data.fields());
    }
    
