@@ -2,6 +2,7 @@ package simpledb.materialize;
 
 import java.util.*;
 
+import simpledb.plan.*;
 import simpledb.query.*;
 import simpledb.record.*;
 
@@ -135,5 +136,5 @@ public class HashJoinScan implements Scan {
    public void close() {
 	   if (probescan != null)
 	       probescan.close();
-	   }
 	}
+}

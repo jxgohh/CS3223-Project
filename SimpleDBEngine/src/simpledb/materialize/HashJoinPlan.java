@@ -118,4 +118,10 @@ public class HashJoinPlan implements Plan {
          dest.close();
       return parts;
    }
+   
+   public String toString() {
+      return "Hash Join: " + fldname1 + " = " + fldname2 + "\n"
+           + Plan.indent(p1.toString()) + "\n"
+           + Plan.indent(p2.toString());
+   }
 }

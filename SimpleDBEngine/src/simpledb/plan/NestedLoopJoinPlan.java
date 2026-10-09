@@ -75,6 +75,12 @@ public class NestedLoopJoinPlan implements Plan{
    public Schema schema() {
       return schema;
    }
+   
+   public String toString() {
+      return "Nested Loop Join: " + joinpred + "\n"
+           + Plan.indent(p1.toString()) + "\n"
+           + Plan.indent(p2.toString());
+   }
 }
 
 

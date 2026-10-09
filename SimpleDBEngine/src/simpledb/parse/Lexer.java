@@ -190,6 +190,6 @@ public class Lexer {
                                "insert", "into", "values", "delete", "update", "set", 
                                "create", "table", "int", "varchar", "view", "as", "index", 
                                "using", "on", "asc", "desc", "order", "by",
-                               "group", "sum", "count", "avg", "min", "max");
+                               "group", "sum", "count", "avg", "min", "max", "distinct");
    }
 }

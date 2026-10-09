@@ -16,18 +16,20 @@ public class QueryData {
    private Predicate pred;
    private List<String> groupFields;
    private List<AggregationFn> aggFns;
+   private boolean distinct;
    
    /**
     * Saves the field and table list and predicate.
     */
    public QueryData(List<String> fields, Collection<String> tables, List<String> orders, Predicate pred,
-		   List<String> groupFields, List<AggregationFn> aggFns) {
+		   List<String> groupFields, List<AggregationFn> aggFns, boolean distinct) {
       this.fields = fields;
       this.tables = tables;
       this.orders = orders;
       this.pred = pred;
       this.groupFields = groupFields;
       this.aggFns = aggFns;
+      this.distinct = distinct;
    }
    
    /**
@@ -81,6 +83,13 @@ public class QueryData {
     */
    public boolean hasGroupBy() {
       return !groupFields.isEmpty() || !aggFns.isEmpty();
+   }
+   
+   /**
+    * Returns true if the query has the distinct keyword.
+    */
+   public boolean isDistinct() {
+      return distinct;
    }
    
    public String toString() {

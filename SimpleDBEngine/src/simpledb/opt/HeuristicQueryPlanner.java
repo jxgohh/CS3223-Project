@@ -51,11 +51,15 @@ public class HeuristicQueryPlanner implements QueryPlanner {
       if (data.hasGroupBy())
          currentplan = new GroupByPlan(tx, currentplan, data.groupFields(), data.aggFns());
       
-      // Step 5: Order by
+      // Step 5: Distinct
+      if (data.isDistinct())
+    	  currentplan = new DistinctPlan(tx, currentplan, data.fields());
+      
+      // Step 6: Order by
       if (!data.orders().isEmpty())
          currentplan = new SortPlan(tx, currentplan, data.orders());
       
-      // Step 6: Project on the field names and return
+      // Step 7: Project on the field names and return
       return new ProjectPlan(currentplan, data.fields());
    }
    

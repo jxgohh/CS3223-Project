@@ -112,4 +112,10 @@ public class MultibufferProductPlan implements Plan {
       dest.close();
       return t;
    }
+   
+   public String toString() {
+      return "Multibuffer Product\n"
+           + Plan.indent(lhs.toString()) + "\n"
+           + Plan.indent(rhs.toString());
+   }
 }

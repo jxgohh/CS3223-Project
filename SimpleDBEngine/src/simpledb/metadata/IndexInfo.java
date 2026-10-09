@@ -114,4 +114,8 @@ public class IndexInfo {
       }
       return new Layout(sch);
    }
+   
+   public String toString() {
+	      return idxtype + " index " + idxname + " on " + fldname;
+	   }
 }

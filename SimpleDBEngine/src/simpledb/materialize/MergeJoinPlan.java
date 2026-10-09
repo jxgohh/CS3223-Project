@@ -98,5 +98,11 @@ public class MergeJoinPlan implements Plan {
    public Schema schema() {
       return sch;
    }
+   
+   public String toString() {
+      return "Merge Join: " + fldname1 + " = " + fldname2 + "\n"
+           + Plan.indent(p1.toString()) + "\n"
+           + Plan.indent(p2.toString());
+   }
 }
 

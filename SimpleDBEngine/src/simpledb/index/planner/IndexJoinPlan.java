@@ -88,4 +88,10 @@ public class IndexJoinPlan implements Plan {
    public Schema schema() {
       return sch;
    }
+   
+   public String toString() {
+      return "Index Join: " + joinfield + " using " + ii + "\n"
+           + Plan.indent(p1.toString()) + "\n"
+           + Plan.indent(p2.toString());
+   }
 }

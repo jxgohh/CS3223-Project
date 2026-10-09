@@ -104,4 +104,12 @@ public class GroupByPlan implements Plan {
    public Schema schema() {
       return sch;
    }
+   
+   public String toString() {
+      List<String> aggnames = new ArrayList<>();
+      for (AggregationFn fn : aggfns)
+         aggnames.add(fn.fieldName());
+      return "Group By (sort-based): " + groupfields + " aggregates: " + aggnames
+           + "\n" + Plan.indent(p.toString());
+   }
 }

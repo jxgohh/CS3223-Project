@@ -84,4 +84,8 @@ public class MaterializePlan implements Plan {
    public Schema schema() {
       return srcplan.schema();
    }
+   
+ 	public String toString() {
+	    return "Materialize\n" + Plan.indent(srcplan.toString());	
+   }
 }

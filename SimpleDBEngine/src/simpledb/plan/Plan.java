@@ -45,4 +45,12 @@ public interface Plan {
     * @return the query's schema
     */
    public Schema schema();
+   
+   /**
+    * Indents every line of a child plan's description by two spaces.
+    * Used by toString() to display the plan as a tree.
+    */
+   static String indent(String s) {
+      return "  " + s.replace("\n", "\n  ");
+   }
 }
