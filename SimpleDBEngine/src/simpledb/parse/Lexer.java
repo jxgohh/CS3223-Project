@@ -18,7 +18,7 @@ public class Lexer {
    public Lexer(String s) {
       initKeywords();
       tok = new StreamTokenizer(new StringReader(s));
-      tok.ordinaryChar('.');   //disallow "." in identifiers
+      // tok.ordinaryChar('.');   //disallow "." in identifiers
       tok.wordChars('_', '_'); //allow "_" in identifiers
       tok.lowerCaseMode(true); //ids and keywords are converted
       nextToken();
@@ -77,7 +77,8 @@ public class Lexer {
     * @return true if the current token is an identifier
     */
    public boolean matchId() {
-      return  tok.ttype==StreamTokenizer.TT_WORD && !keywords.contains(tok.sval);
+      return tok.ttype==StreamTokenizer.TT_WORD && !keywords.contains(tok.sval)
+    		  && !tok.sval.contains(".");
    }
    
 //Methods to "eat" the current token
@@ -141,6 +142,15 @@ public class Lexer {
       return s;
    }
    
+   public float eatFloatConstant() {
+	      if (!matchIntConstant()) {
+	         throw new BadSyntaxException();
+	      }
+	      float i = (float) tok.nval;
+	      nextToken();
+	      return i;
+   }
+   
    /**
     * Throws an exception if the current token is not the
     * specified keyword. 
@@ -188,7 +198,7 @@ public class Lexer {
    private void initKeywords() {
       keywords = Arrays.asList("select", "from", "where", "and",
                                "insert", "into", "values", "delete", "update", "set", 
-                               "create", "table", "int", "varchar", "view", "as", "index", 
+                               "create", "table", "int", "varchar", "float", "view", "as", "index", 
                                "using", "on", "asc", "desc", "order", "by",
                                "group", "sum", "count", "avg", "min", "max", "distinct");
    }

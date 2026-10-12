@@ -1,5 +1,7 @@
 package simpledb.query;
 
+import java.time.LocalTime;
+
 /**
  * The class that denotes values stored in the database.
  * @author Edward Sciore
@@ -7,6 +9,9 @@ package simpledb.query;
 public class Constant implements Comparable<Constant> {
    private Integer ival = null;
    private String  sval = null;
+   private Float   fval = null;
+   private Double  dval = null;
+   private LocalTime tval = null;
    
    public Constant(Integer ival) {
       this.ival = ival;
@@ -14,6 +19,10 @@ public class Constant implements Comparable<Constant> {
    
    public Constant(String sval) {
       this.sval = sval;
+   }
+   
+   public Constant(LocalTime tval) {
+	   this.tval = tval;
    }
    
    public int asInt() {
@@ -29,7 +38,15 @@ public class Constant implements Comparable<Constant> {
 		      return false;
 
 	   Constant c = (Constant) obj;
-      return (ival != null) ? ival.equals(c.ival) : sval.equals(c.sval);
+	   
+	   if (ival != null) {
+		   return ival.equals(c.ival);
+	   } else if (sval != null) {
+		   return sval.equals(c.sval);
+	   } 
+	   
+	   return false;
+       /* return (ival != null) ? ival.equals(c.ival) : sval.equals(c.sval); */
    }
    
    public int compareTo(Constant c) {

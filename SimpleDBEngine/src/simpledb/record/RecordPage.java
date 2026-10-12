@@ -42,6 +42,11 @@ public class RecordPage {
       int fldpos = offset(slot) + layout.offset(fldname);
       return tx.getString(blk, fldpos);
    }
+   
+   public float getFloat(int slot, String fldname) {
+	   int fldpos = offset(slot) + layout.offset(fldname);
+	   return tx.getFloat(blk, fldpos);
+   }
 
    /**
     * Store an integer at the specified field
@@ -63,6 +68,11 @@ public class RecordPage {
    public void setString(int slot, String fldname, String val) {
       int fldpos = offset(slot) + layout.offset(fldname);
       tx.setString(blk, fldpos, val, true);
+   }
+   
+   public void setFloat(int slot, String fldname, float val) {
+      int fldpos = offset(slot) + layout.offset(fldname);
+      tx.setFloat(blk, fldpos, val, true);
    }
    
    public void delete(int slot) {

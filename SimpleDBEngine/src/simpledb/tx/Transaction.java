@@ -132,6 +132,12 @@ public class Transaction {
       return buff.contents().getString(offset);
    }
    
+   public Float getFloat(BlockId blk, int offset) {
+	      concurMgr.sLock(blk);
+	      Buffer buff = mybuffers.getBuffer(blk);
+	      return buff.contents().getFloat(offset);
+	   }
+   
    /**
     * Store an integer at the specified offset 
     * of the specified block.
@@ -179,6 +185,17 @@ public class Transaction {
       p.setString(offset, val);
       buff.setModified(txnum, lsn);
    }
+   
+   public void setFloat(BlockId blk, int offset, float val, boolean okToLog) {
+	      concurMgr.xLock(blk);
+	      Buffer buff = mybuffers.getBuffer(blk);
+	      int lsn = -1;
+	      if (okToLog)
+	         lsn = recoveryMgr.setFloat(buff, offset, val);
+	      Page p = buff.contents();
+	      p.setFloat(offset, val);
+	      buff.setModified(txnum, lsn);
+	   }
 
    /**
     * Return the number of blocks in the specified file.

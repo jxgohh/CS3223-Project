@@ -82,6 +82,12 @@ public class RecoveryMgr {
       BlockId blk = buff.block();
       return SetStringRecord.writeToLog(lm, txnum, blk, offset, oldval);
    }
+   
+   public int setFloat(Buffer buff, int offset, float newval) {
+      int oldval = buff.contents().getInt(offset);
+      BlockId blk = buff.block();
+      return SetFloatRecord.writeToLog(lm, txnum, blk, offset, oldval);
+   }
 
    /**
     * Rollback the transaction, by iterating

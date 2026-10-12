@@ -51,6 +51,10 @@ public class TableScan implements UpdateScan {
    public String getString(String fldname) {
       return rp.getString(currentslot, fldname);
    }
+   
+   public float getFloat(String fldname) {
+	   return rp.getFloat(currentslot, fldname);
+   }
 
    public Constant getVal(String fldname) {
       if (layout.schema().type(fldname) == INTEGER)
