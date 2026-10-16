@@ -18,13 +18,23 @@ public class Lexer {
    public Lexer(String s) {
       initKeywords();
       tok = new StreamTokenizer(new StringReader(s));
-      // tok.ordinaryChar('.');   //disallow "." in identifiers
+      // Read numeric literals as words for the integer/float checks below.
+      tok.ordinaryChars('0', '9');
+      tok.ordinaryChar('.');
+      tok.ordinaryChar('-');
+      tok.wordChars('0', '9');
+      tok.wordChars('.', '.');
+      tok.wordChars('-', '-'); // supports negative numbers
       tok.wordChars('_', '_'); //allow "_" in identifiers
       tok.lowerCaseMode(true); //ids and keywords are converted
       nextToken();
    }
    
 //Methods to check the status of the current token
+
+   public boolean matchEnd() {
+      return tok.ttype == StreamTokenizer.TT_EOF;
+   }
    
    /**
     * Returns true if the current token is
@@ -46,7 +56,13 @@ public class Lexer {
     * @return true if the current token is an integer
     */
    public boolean matchIntConstant() {
-      return tok.ttype == StreamTokenizer.TT_NUMBER;
+	   return tok.ttype == StreamTokenizer.TT_WORD
+	         && tok.sval.matches("-?\\d+");
+   }
+   
+   public boolean matchFloatConstant() {
+	   return tok.ttype == StreamTokenizer.TT_WORD
+	         && tok.sval.matches("-?(?:\\d+\\.\\d*|\\.\\d+)");
    }
    
    /**
@@ -77,8 +93,14 @@ public class Lexer {
     * @return true if the current token is an identifier
     */
    public boolean matchId() {
-      return tok.ttype==StreamTokenizer.TT_WORD && !keywords.contains(tok.sval)
-    		  && !tok.sval.contains(".");
+	   return tok.ttype == StreamTokenizer.TT_WORD
+	         && tok.sval.matches("[a-z_][a-z0-9_]*")
+	         && !keywords.contains(tok.sval);
+   }
+   
+   public boolean matchFieldName() {
+	   return tok.ttype == StreamTokenizer.TT_WORD
+	         && tok.sval.matches("[a-z_][a-z0-9_]*(\\.[a-z_][a-z0-9_]*)?");
    }
    
 //Methods to "eat" the current token
@@ -120,13 +142,21 @@ public class Lexer {
     * Otherwise, returns that integer and moves to the next token.
     * @return the integer value of the current token
     */
-   public int eatIntConstant() {
-      if (!matchIntConstant())
-         throw new BadSyntaxException();
-      int i = (int) tok.nval;
-      nextToken();
-      return i;
-   }
+    public int eatIntConstant() {
+	   if (!matchIntConstant())
+	      throw new BadSyntaxException();
+	   int value = Integer.parseInt(tok.sval); // "05" becomes 5
+	   nextToken();
+	   return value;
+    }
+
+    public float eatFloatConstant() {
+	   if (!matchFloatConstant())
+	      throw new BadSyntaxException();
+	   float value = Float.parseFloat(tok.sval); // "12.05" stays 12.05
+	   nextToken();
+	   return value;
+    }
    
    /**
     * Throws an exception if the current token is not 
@@ -140,15 +170,6 @@ public class Lexer {
       String s = tok.sval; //constants are not converted to lower case
       nextToken();
       return s;
-   }
-   
-   public float eatFloatConstant() {
-	      if (!matchIntConstant()) {
-	         throw new BadSyntaxException();
-	      }
-	      float i = (float) tok.nval;
-	      nextToken();
-	      return i;
    }
    
    /**
@@ -186,6 +207,14 @@ public class Lexer {
       return s;
    }
    
+   public String eatFieldName() {
+	   if (!matchFieldName())
+	      throw new BadSyntaxException();
+	   String name = tok.sval;
+	   nextToken();
+	   return name;
+   }
+   
    private void nextToken() {
       try {
          tok.nextToken();
@@ -200,6 +229,7 @@ public class Lexer {
                                "insert", "into", "values", "delete", "update", "set", 
                                "create", "table", "int", "varchar", "float", "view", "as", "index", 
                                "using", "on", "asc", "desc", "order", "by",
-                               "group", "sum", "count", "avg", "min", "max", "distinct");
+                               "group", "sum", "count", "avg", "min", "max", "distinct",
+                               "union", "intersect", "except");
    }
 }

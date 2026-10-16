@@ -79,6 +79,8 @@ public class Layout {
       int fldtype = schema.type(fldname);
       if (fldtype == INTEGER)
          return Integer.BYTES;
+      else if (fldtype == FLOAT)
+    	 return Float.BYTES;
       else // fldtype == VARCHAR
          return Page.maxLength(schema.length(fldname));
    }

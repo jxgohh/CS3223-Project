@@ -23,12 +23,10 @@ public class Planner {
     * @return the scan corresponding to the query plan
     */
    public Plan createQueryPlan(String qry, Transaction tx) {
-	  Parser parser = new Parser(qry);
-      QueryData data = parser.query();
+	   Parser parser = new Parser(qry);
+      QueryData data = parser.setQuery();
       verifyQuery(data);
-      Plan p = qplanner.createPlan(data, tx);
-      System.out.println("Query plan:\n" + p);
-      return p;
+      return qplanner.createPlan(data, tx);
    }
    
    /**

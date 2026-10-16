@@ -17,6 +17,8 @@ public class QueryData {
    private List<String> groupFields;
    private List<AggregationFn> aggFns;
    private boolean distinct;
+   private String setOperation;
+   private QueryData rightQuery;
    
    /**
     * Saves the field and table list and predicate.
@@ -30,6 +32,25 @@ public class QueryData {
       this.groupFields = groupFields;
       this.aggFns = aggFns;
       this.distinct = distinct;
+   }
+
+   public QueryData(QueryData left, String setOperation, QueryData rightQuery) {
+      this(left.fields(), left.tables(), left.orders(), left.pred(),
+           left.groupFields(), left.aggFns(), left.isDistinct());
+      this.setOperation = setOperation;
+      this.rightQuery = rightQuery;
+   }
+
+   public boolean hasSetOperation() {
+      return setOperation != null;
+   }
+
+   public String setOperation() {
+      return setOperation;
+   }
+
+   public QueryData rightQuery() {
+      return rightQuery;
    }
    
    /**
@@ -110,6 +131,8 @@ public class QueryData {
     		  result += ordernames + ", ";
     	  result = result.substring(0, result.length()-2); //remove final comma
       }
+      if (hasSetOperation())
+         result += " " + setOperation + " " + rightQuery;
       return result;
    }
 }

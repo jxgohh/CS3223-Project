@@ -10,8 +10,8 @@ public class Constant implements Comparable<Constant> {
    private Integer ival = null;
    private String  sval = null;
    private Float   fval = null;
-   private Double  dval = null;
-   private LocalTime tval = null;
+//   private Double  dval = null;
+//   private LocalTime tval = null;
    
    public Constant(Integer ival) {
       this.ival = ival;
@@ -21,8 +21,8 @@ public class Constant implements Comparable<Constant> {
       this.sval = sval;
    }
    
-   public Constant(LocalTime tval) {
-	   this.tval = tval;
+   public Constant(Float fval) {
+	   this.fval = fval;
    }
    
    public int asInt() {
@@ -33,31 +33,41 @@ public class Constant implements Comparable<Constant> {
       return sval;
    }
    
+   public float asFloat() {
+	   return fval;
+   }
+   
    public boolean equals(Object obj) {
 	   if (obj == null || !(obj instanceof Constant))
 		      return false;
 
 	   Constant c = (Constant) obj;
 	   
-	   if (ival != null) {
-		   return ival.equals(c.ival);
-	   } else if (sval != null) {
-		   return sval.equals(c.sval);
-	   } 
-	   
+	   if (ival != null) return ival.equals(c.ival);
+	   if (sval != null) return sval.equals(c.sval);
+	   if (fval != null) return fval.equals(c.fval);
 	   return false;
        /* return (ival != null) ? ival.equals(c.ival) : sval.equals(c.sval); */
    }
    
    public int compareTo(Constant c) {
-      return (ival != null) ? ival.compareTo(c.ival) : sval.compareTo(c.sval);
+	   if (ival != null && c.ival != null) return ival.compareTo(c.ival);
+	   if (sval != null && c.sval != null) return sval.compareTo(c.sval);
+	   if (fval != null && c.fval != null) return fval.compareTo(c.fval);
+	   throw new IllegalArgumentException("Cannot compare constants of different types");
    }
    
    public int hashCode() {
-      return (ival != null) ? ival.hashCode() : sval.hashCode();
-   }
-   
-   public String toString() {
-      return (ival != null) ? ival.toString() : sval.toString();
-   }   
+	   if (ival != null) return ival.hashCode();
+	   if (sval != null) return sval.hashCode();
+	   if (fval != null) return fval.hashCode();
+	   return 0;
+	}
+
+	public String toString() {
+	   if (ival != null) return ival.toString();
+	   if (sval != null) return sval;
+	   if (fval != null) return fval.toString();
+	   return "";
+	}
 }

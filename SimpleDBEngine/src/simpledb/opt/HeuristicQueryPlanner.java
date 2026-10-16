@@ -28,6 +28,16 @@ public class HeuristicQueryPlanner implements QueryPlanner {
     * results in the smallest output.
     */
    public Plan createPlan(QueryData data, Transaction tx) {
+      Plan left = createSinglePlan(data, tx);
+      if (!data.hasSetOperation())
+         return left;
+
+      Plan right = createSinglePlan(data.rightQuery(), tx);
+      return new SetOperationPlan(tx, left, right, data.setOperation());
+   }
+
+   /** Uses the existing planning steps for one SELECT statement. */
+   private Plan createSinglePlan(QueryData data, Transaction tx) {
       
       // Step 1:  Create a TablePlanner object for each mentioned table
       for (String tblname : data.tables()) {

@@ -1,6 +1,7 @@
 package simpledb.record;
 
 import static java.sql.Types.INTEGER;
+import static java.sql.Types.FLOAT;
 import simpledb.file.BlockId;
 import simpledb.query.*;
 import simpledb.tx.Transaction;
@@ -59,6 +60,8 @@ public class TableScan implements UpdateScan {
    public Constant getVal(String fldname) {
       if (layout.schema().type(fldname) == INTEGER)
          return new Constant(getInt(fldname));
+      else if (layout.schema().type(fldname) == FLOAT)
+         return new Constant(getFloat(fldname));
       else
          return new Constant(getString(fldname));
    }
@@ -85,6 +88,8 @@ public class TableScan implements UpdateScan {
    public void setVal(String fldname, Constant val) {
       if (layout.schema().type(fldname) == INTEGER)
          setInt(fldname, val.asInt());
+      else if (layout.schema().type(fldname) == FLOAT)
+         rp.setFloat(currentslot, fldname, val.asFloat());
       else
          setString(fldname, val.asString());
    }

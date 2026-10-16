@@ -55,6 +55,8 @@ public interface LogRecord {
          return new SetIntRecord(p);
       case SETSTRING: 
          return new SetStringRecord(p);
+      case SETFLOAT:
+         return new SetFloatRecord(p);
       default:
          return null;
       }

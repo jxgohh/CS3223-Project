@@ -84,7 +84,7 @@ public class RecoveryMgr {
    }
    
    public int setFloat(Buffer buff, int offset, float newval) {
-      int oldval = buff.contents().getInt(offset);
+      float oldval = buff.contents().getFloat(offset);
       BlockId blk = buff.block();
       return SetFloatRecord.writeToLog(lm, txnum, blk, offset, oldval);
    }

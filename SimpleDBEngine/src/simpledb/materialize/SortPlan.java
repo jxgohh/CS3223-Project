@@ -43,6 +43,9 @@ public class SortPlan implements Plan {
       src.close();
       while (runs.size() > 2)
          runs = doAMergeIteration(runs);
+
+      if (runs.isEmpty())
+         runs.add(new TempTable(tx, sch));
       return new SortScan(runs, comp);
    }
    

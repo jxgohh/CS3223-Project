@@ -1,6 +1,7 @@
 package simpledb.record;
 
 import static java.sql.Types.INTEGER;
+import static java.sql.Types.FLOAT;
 import simpledb.file.*;
 import simpledb.tx.Transaction;
 
@@ -92,6 +93,8 @@ public class RecordPage {
             int fldpos = offset(slot) + layout.offset(fldname);
             if (sch.type(fldname) == INTEGER)
                tx.setInt(blk, fldpos, 0, false);
+            else if (sch.type(fldname) == FLOAT)
+               tx.setFloat(blk, fldpos, 0.0f, false);
             else
                tx.setString(blk, fldpos, "", false);
          }

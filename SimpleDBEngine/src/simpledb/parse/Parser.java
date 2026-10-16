@@ -25,18 +25,20 @@ public class Parser {
 // Methods for parsing predicates, terms, expressions, constants, and fields
    
    public String field() {
-      return lex.eatId();
+      return lex.eatFieldName();
    }
    
    public Constant constant() {
       if (lex.matchStringConstant())
          return new Constant(lex.eatStringConstant());
-      else
+      else if (lex.matchIntConstant())
          return new Constant(lex.eatIntConstant());
+      else
+    	   return new Constant(lex.eatFloatConstant());
    }
    
    public Expression expression() {
-      if (lex.matchId())
+      if (lex.matchFieldName())
          return new Expression(field());
       else
          return new Expression(constant());
@@ -60,6 +62,31 @@ public class Parser {
    }
    
 // Methods for parsing queries
+   /** Parses an ordinary query or one set operation between two queries. */
+   public QueryData setQuery() {
+      QueryData left = query();
+      QueryData result = left;
+      if (matchSetOperation()) {
+         String operation = lex.matchKeyword("union") ? "union"
+               : lex.matchKeyword("intersect") ? "intersect" : "except";
+         lex.eatKeyword(operation);
+         QueryData right = query();
+         if (!left.orders().isEmpty() || !right.orders().isEmpty())
+            throw new BadSyntaxException();
+         if (matchSetOperation())
+            throw new BadSyntaxException();
+         result = new QueryData(left, operation, right);
+      }
+      if (!lex.matchEnd())
+         throw new BadSyntaxException();
+      return result;
+   }
+
+   private boolean matchSetOperation() {
+      return lex.matchKeyword("union") || lex.matchKeyword("intersect")
+            || lex.matchKeyword("except");
+   }
+
    public QueryData query() {
       lex.eatKeyword("select");
       boolean distinct = false;
@@ -292,8 +319,10 @@ public class Parser {
       if (lex.matchKeyword("int")) {
          lex.eatKeyword("int");
          schema.addIntField(fldname);
-      }
-      else {
+      } else if (lex.matchKeyword("float")) {
+		 lex.eatKeyword("float");
+		 schema.addFloatField(fldname);
+      } else {
          lex.eatKeyword("varchar");
          lex.eatDelim('(');
          int strLen = lex.eatIntConstant();
