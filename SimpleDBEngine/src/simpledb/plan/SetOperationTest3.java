@@ -2,10 +2,14 @@ package simpledb.plan;
 
 import simpledb.server.SimpleDB;
 import simpledb.tx.Transaction;
+
+import java.io.File;
+
 import simpledb.query.Scan;
 
 public class SetOperationTest3 {
    public static void main(String[] args) {
+	  deleteDir(new File("setexcepttest1"));
       SimpleDB db = new SimpleDB("setexcepttest1");
       Transaction tx = db.newTx();
       Planner planner = db.planner();
@@ -55,5 +59,13 @@ public class SetOperationTest3 {
       s.close();
 
       tx.commit();
+   }
+   
+   private static void deleteDir(File dir) {
+      File[] files = dir.listFiles();
+      if (files != null)
+         for (File f : files)
+            f.delete();
+      dir.delete();
    }
 }

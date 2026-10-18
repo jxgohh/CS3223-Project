@@ -108,6 +108,8 @@ public class IndexInfo {
       sch.addIntField("id");
       if (tblSchema.type(fldname) == INTEGER)
          sch.addIntField("dataval");
+      else if (tblSchema.type(fldname) == java.sql.Types.FLOAT)
+         sch.addFloatField("dataval");
       else {
          int fldlen = tblSchema.length(fldname);
          sch.addStringField("dataval", fldlen);

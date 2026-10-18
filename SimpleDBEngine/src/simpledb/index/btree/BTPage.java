@@ -127,12 +127,14 @@ public class BTPage {
    
    private void makeDefaultRecord(BlockId blk, int pos) {
       for (String fldname : layout.schema().fields()) {
-         int offset = layout.offset(fldname);
-         if (layout.schema().type(fldname) == INTEGER)
-            tx.setInt(blk, pos + offset, 0, false);
-         else
-            tx.setString(blk, pos + offset, "", false);
-      }
+          int offset = layout.offset(fldname);
+          if (layout.schema().type(fldname) == INTEGER)
+             tx.setInt(blk, pos + offset, 0, false);
+          else if (layout.schema().type(fldname) == java.sql.Types.FLOAT)
+             tx.setFloat(blk, pos + offset, 0.0f, false);
+          else
+             tx.setString(blk, pos + offset, "", false);
+       }
    }
    // Methods called only by BTreeDir
    
@@ -213,10 +215,17 @@ public class BTPage {
       return tx.getString(currentblk, pos);
    }
    
+   private float getFloat(int slot, String fldname) {
+      int pos = fldpos(slot, fldname);
+      return tx.getFloat(currentblk, pos);
+   }
+   
    private Constant getVal(int slot, String fldname) {
       int type = layout.schema().type(fldname);
       if (type == INTEGER)
          return new Constant(getInt(slot, fldname));
+      else if (type == java.sql.Types.FLOAT)
+         return new Constant(getFloat(slot, fldname));
       else
          return new Constant(getString(slot, fldname));
    }
@@ -230,11 +239,18 @@ public class BTPage {
       int pos = fldpos(slot, fldname);
       tx.setString(currentblk, pos, val, true);
    }
+
+   private void setFloat(int slot, String fldname, float val) {
+      int pos = fldpos(slot, fldname);
+      tx.setFloat(currentblk, pos, val, true);
+   }
    
    private void setVal(int slot, String fldname, Constant val) {
       int type = layout.schema().type(fldname);
       if (type == INTEGER)
          setInt(slot, fldname, val.asInt());
+      else if (type == java.sql.Types.FLOAT)
+         setFloat(slot, fldname, val.asFloat());
       else
          setString(slot, fldname, val.asString());
    }

@@ -126,6 +126,10 @@ public class PlannerTest8 {
          "select sname from student where sid = 3",
          "sname");
 
+      runQuery(planner, tx, "TEST 9: inequality on an indexed field",
+         "select sname from student where sid > 6",
+         "sname");
+      
       tx.commit();
    }
 

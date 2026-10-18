@@ -1,5 +1,7 @@
 package simpledb.plan;
 
+import java.io.File;
+
 import simpledb.parse.BadSyntaxException;
 import simpledb.query.Scan;
 import simpledb.server.SimpleDB;
@@ -7,6 +9,7 @@ import simpledb.tx.Transaction;
 
 public class PlannerTest6 {
    public static void main(String[] args) {
+	  deleteDir(new File("aggtest1"));
       SimpleDB db = new SimpleDB("aggtest1");
       Transaction tx = db.newTx();
       Planner planner = db.planner();
@@ -103,5 +106,13 @@ public class PlannerTest6 {
          System.out.println(row);
       }
       s.close();
+   }
+   
+   private static void deleteDir(File dir) {
+      File[] files = dir.listFiles();
+      if (files != null)
+         for (File f : files)
+            f.delete();
+      dir.delete();
    }
 }

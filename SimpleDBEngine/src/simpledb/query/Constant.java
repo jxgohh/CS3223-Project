@@ -37,6 +37,10 @@ public class Constant implements Comparable<Constant> {
 	   return fval;
    }
    
+   public boolean isFloat() {
+	   return fval != null;
+   }
+   
    public boolean equals(Object obj) {
 	   if (obj == null || !(obj instanceof Constant))
 		      return false;

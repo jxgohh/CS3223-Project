@@ -1,11 +1,14 @@
 package simpledb.plan;
 
+import java.io.File;
+
 import simpledb.query.Scan;
 import simpledb.server.SimpleDB;
 import simpledb.tx.Transaction;
 
 public class PlannerTest7 {
    public static void main(String[] args) {
+	  deleteDir(new File("hashjointest1"));
       SimpleDB db = new SimpleDB("hashjointest1");
       Transaction tx = db.newTx();
       Planner planner = db.planner();
@@ -83,12 +86,20 @@ public class PlannerTest7 {
       runQuery(planner, tx, "TEST 4: non-equality join (no hash join)",
          "select A, B, C, D from T1, T2 where A < C",
          "a", "b", "c", "d");
-
+      
+      runQuery(planner, tx, "TEST 5: join + condition on joined table",
+    	      "select sname, dname from student, dept where majorid = did and dname = 'math'",
+    	      "sname", "dname");
+      
+      runQuery(planner, tx, "TEST 6: nested loop join + condition on inner table",
+    	         "select A, B, C, D from T1, T2 where A < C and D = 'seven'",
+    	         "a", "b", "c", "d");
+      
       tx.commit();
    }
    
    private static void runQuery(Planner planner, Transaction tx,
-           String title, String qry, String... fields) {
+	    String title, String qry, String... fields) {
 		System.out.println("\n" + title);
 		System.out.println(qry);
 		Plan p = planner.createQueryPlan(qry, tx);
@@ -103,5 +114,13 @@ public class PlannerTest7 {
 		}
 		System.out.println("(" + count + " rows)");
 		s.close();
-	}
+   }
+   
+   private static void deleteDir(File dir) {
+      File[] files = dir.listFiles();
+      if (files != null)
+         for (File f : files)
+            f.delete();
+      dir.delete();
+   }
 }

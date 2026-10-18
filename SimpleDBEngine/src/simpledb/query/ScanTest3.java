@@ -1,5 +1,6 @@
 package simpledb.query;
 
+import java.io.File;
 import java.util.*;
 import simpledb.server.SimpleDB;
 import simpledb.tx.Transaction;
@@ -7,7 +8,8 @@ import simpledb.record.*;
 
 public class ScanTest3 {
    public static void main(String[] args) throws Exception {
-      SimpleDB db = new SimpleDB("scantest3");
+	   deleteDir(new File("scantest3"));
+	   SimpleDB db = new SimpleDB("scantest3");
       Transaction tx = db.newTx();
 
       Schema sch1 = new Schema();
@@ -49,5 +51,13 @@ public class ScanTest3 {
       System.out.println("Number of records printed: " + count);
       s4.close();
       tx.commit();
+   }
+   
+   private static void deleteDir(File dir) {
+      File[] files = dir.listFiles();
+      if (files != null)
+         for (File f : files)
+            f.delete();
+      dir.delete();
    }
 }

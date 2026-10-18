@@ -92,10 +92,7 @@ class TablePlanner {
 	   if (joinpred == null)
 		   return null;
 	   
-	   Plan p = new NestedLoopJoinPlan(current, myplan, joinpred);
-	   
-	   return addSelectPred(p);
-	   
+	   return new NestedLoopJoinPlan(current, addSelectPred(myplan), joinpred);
    }
    
    private Plan makeIndexSelect() {
@@ -146,27 +143,16 @@ class TablePlanner {
    }
    
    private Plan makeMergeJoin(Plan current, Schema currsch) {
-	   Predicate joinpred = mypred.joinSubPred(myschema, currsch);
-	   for (String myfield : myschema.fields()) {
-	      String outerfield = joinpred.equatesWithField(myfield);
-	      if (outerfield != null && currsch.hasField(outerfield)) {
-
-	         System.out.println(
-	            "Merge join: current." + outerfield +
-	            " = table." + myfield
-	         );
-
-	         return new MergeJoinPlan(
-	            tx,
-	            current,
-	            myplan,
-	            outerfield,
-	            myfield
-	         );
-	      }
-	   }
-
-	   return null;
+      Predicate joinpred = mypred.joinSubPred(myschema, currsch);
+      for (String myfield : myschema.fields()) {
+         String outerfield = joinpred.equatesWithField(myfield);
+         if (outerfield != null && currsch.hasField(outerfield)) {
+            System.out.println("Merge join: current." + outerfield + " = table." + myfield);
+            Plan p = new MergeJoinPlan(tx, current, addSelectPred(myplan), outerfield, myfield);
+            return addJoinPred(p, currsch);
+         }
+      }
+      return null;
 	}
    
    private Plan makeHashJoin(Plan current, Schema currsch) {

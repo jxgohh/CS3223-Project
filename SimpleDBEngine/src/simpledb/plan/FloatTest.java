@@ -2,10 +2,14 @@ package simpledb.plan;
 
 import simpledb.server.SimpleDB;
 import simpledb.tx.Transaction;
+
+import java.io.File;
+
 import simpledb.query.Scan;
 
 public class FloatTest {
    public static void main(String[] args) {
+	  deleteDir(new File("floattest1"));
       SimpleDB db = new SimpleDB("floattest1");
       Transaction tx = db.newTx();
       Planner planner = db.planner();
@@ -71,7 +75,55 @@ public class FloatTest {
       while (s.next())
          System.out.println(s.getInt("a") + " " + s.getVal("b").asFloat());
       s.close();
+      
+      /*
+       * Test 6: sum and avg of a float field.
+       * After Test 5, B is 3.75, -2.25, 0.0, 1.5
+       * Expected: 3.0 0.75
+       */
+      System.out.println("\nFLOAT SUM / AVG:");
+      p = planner.createQueryPlan("select sum(B), avg(B) from T1", tx);
+      s = p.open();
+      while (s.next())
+         System.out.println(s.getVal("sumofb") + " " + s.getVal("avgofb"));
+      s.close();
+      
+      /*
+       * Test 7: indexes on a float field (btree and hash).
+       * Expected: both lookups return 2 rows: 1 1.5 and 4 1.5
+       */
+      planner.executeUpdate("create table T2(A int, B float)", tx);
+      planner.executeUpdate("create table T3(A int, B float)", tx);
+      planner.executeUpdate("create index using btree idxb2 on T2(B)", tx);
+      planner.executeUpdate("create index using hash idxb3 on T3(B)", tx);
+      String[] vals = {"(1, 1.5)", "(2, -2.25)", "(3, 0.0)", "(4, 1.5)"};
+      for (String v : vals) {
+         planner.executeUpdate("insert into T2(A,B) values" + v, tx);
+         planner.executeUpdate("insert into T3(A,B) values" + v, tx);
+      }
+
+      System.out.println("\nFLOAT BTREE INDEX:");
+      p = planner.createQueryPlan("select A, B from T2 where B = 1.5", tx);
+      s = p.open();
+      while (s.next())
+         System.out.println(s.getInt("a") + " " + s.getVal("b").asFloat());
+      s.close();
+
+      System.out.println("\nFLOAT HASH INDEX:");
+      p = planner.createQueryPlan("select A, B from T3 where B = 1.5", tx);
+      s = p.open();
+      while (s.next())
+         System.out.println(s.getInt("a") + " " + s.getVal("b").asFloat());
+      s.close();
 
       tx.commit();
+   }
+   
+   private static void deleteDir(File dir) {
+      File[] files = dir.listFiles();
+      if (files != null)
+         for (File f : files)
+            f.delete();
+      dir.delete();
    }
 }

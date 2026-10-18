@@ -9,6 +9,8 @@ import simpledb.query.*;
 public class SumFn implements AggregationFn {
    private String fldname;
    private int sum;
+   private float fsum;
+   private boolean isFloat;
    
   /**
     * Create a sum aggregation function for the specified field.
@@ -24,7 +26,13 @@ public class SumFn implements AggregationFn {
     * @see simpledb.materialize.AggregationFn#processFirst(simpledb.query.Scan)
     */
    public void processFirst(Scan s) {
-      sum = s.getInt(fldname);
+	  Constant val = s.getVal(fldname);
+	  isFloat = val.isFloat();
+	  if (isFloat) {
+		  fsum = val.asFloat();
+	  } else {
+		  sum = val.asInt();
+	  }
    }
    
    /**
@@ -32,7 +40,12 @@ public class SumFn implements AggregationFn {
     * @see simpledb.materialize.AggregationFn#processNext(simpledb.query.Scan)
     */
    public void processNext(Scan s) {
-      sum += s.getInt(fldname);
+	  Constant val = s.getVal(fldname);
+	  if (isFloat) {
+		  fsum += val.asFloat();
+	  } else {
+		  sum += val.asInt();
+	  }
    }
    
    /**
@@ -56,6 +69,10 @@ public class SumFn implements AggregationFn {
     * @see simpledb.materialize.AggregationFn#value()
     */
    public Constant value() {
-      return new Constant(sum);
+	   if (isFloat) {
+		   return new Constant(fsum);
+	   } else {
+		   return new Constant(sum);
+	   }
    }
 }

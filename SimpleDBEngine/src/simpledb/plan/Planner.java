@@ -24,9 +24,11 @@ public class Planner {
     */
    public Plan createQueryPlan(String qry, Transaction tx) {
 	   Parser parser = new Parser(qry);
-      QueryData data = parser.setQuery();
-      verifyQuery(data);
-      return qplanner.createPlan(data, tx);
+	   QueryData data = parser.setQuery();
+	   verifyQuery(data);
+	   Plan p = qplanner.createPlan(data,  tx);
+	   System.out.println("Query plan:\n" + p);
+	   return p;
    }
    
    /**

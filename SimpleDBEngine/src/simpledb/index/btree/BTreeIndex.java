@@ -52,9 +52,13 @@ public class BTreeIndex implements Index {
          node.format(rootblk, 0);
          // insert initial directory entry
          int fldtype = dirsch.type("dataval");
-         Constant minval = (fldtype == INTEGER) ?
-               new Constant(Integer.MIN_VALUE) :
-               new Constant("");
+         Constant minval;
+         if (fldtype == INTEGER)
+            minval = new Constant(Integer.MIN_VALUE);
+         else if (fldtype == java.sql.Types.FLOAT)
+            minval = new Constant(Float.NEGATIVE_INFINITY);
+         else
+            minval = new Constant("");
          node.insertDir(0, minval, 0);
          node.close();
       }
