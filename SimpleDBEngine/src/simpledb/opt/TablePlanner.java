@@ -1,6 +1,8 @@
 package simpledb.opt;
 
 import java.util.Map;
+import java.util.Set;
+import simpledb.opt.HeuristicQueryPlanner.JoinMethod;
 import simpledb.tx.Transaction;
 import simpledb.record.*;
 import simpledb.query.*;
@@ -20,6 +22,7 @@ class TablePlanner {
    private Schema myschema;
    private Map<String,IndexInfo> indexes;
    private Transaction tx;
+   private Set<JoinMethod> joinMethods;
    
    /**
     * Creates a new table planner.
@@ -32,6 +35,12 @@ class TablePlanner {
     * @param tx the calling transaction
     */
    public TablePlanner(String tblname, Predicate mypred, Transaction tx, MetadataMgr mdm) {
+      this(tblname, mypred, tx, mdm, java.util.EnumSet.allOf(JoinMethod.class));
+   }
+
+   public TablePlanner(String tblname, Predicate mypred, Transaction tx, MetadataMgr mdm,
+                       Set<JoinMethod> joinMethods) {
+      this.joinMethods = joinMethods;
       this.mypred  = mypred;
       this.tx  = tx;
       myplan   = new TablePlan(tx, tblname, mdm);
@@ -65,12 +74,12 @@ class TablePlanner {
       Predicate joinpred = mypred.joinSubPred(myschema, currsch);
       if (joinpred == null)
          return null;
-      Plan p = makeIndexJoin(current, currsch);
-      if (p == null)
+      Plan p = joinMethods.contains(JoinMethod.INDEX) ? makeIndexJoin(current, currsch) : null;
+      if (p == null && joinMethods.contains(JoinMethod.HASH))
          p = makeHashJoin(current, currsch);
-      if (p == null)
+      if (p == null && joinMethods.contains(JoinMethod.MERGE))
          p = makeMergeJoin(current, currsch);
-      if (p == null) 
+      if (p == null && joinMethods.contains(JoinMethod.NESTED_LOOP))
     	  p = makeNestedLoopJoin(current, currsch);
       return p;
    }

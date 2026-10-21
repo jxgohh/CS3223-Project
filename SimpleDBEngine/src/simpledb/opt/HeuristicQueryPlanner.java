@@ -12,11 +12,22 @@ import simpledb.plan.*;
  * @author Edward Sciore
  */
 public class HeuristicQueryPlanner implements QueryPlanner {
+   public enum JoinMethod { INDEX, HASH, MERGE, NESTED_LOOP }
+
    private Collection<TablePlanner> tableplanners = new ArrayList<>();
    private MetadataMgr mdm;
+   private final Set<JoinMethod> joinMethods;
    
    public HeuristicQueryPlanner(MetadataMgr mdm) {
+      this(mdm, EnumSet.allOf(JoinMethod.class));
+   }
+
+   /** Restricts join methods without changing the optimizer's join-order heuristics. */
+   public HeuristicQueryPlanner(MetadataMgr mdm, Set<JoinMethod> joinMethods) {
+      if (joinMethods.isEmpty())
+         throw new IllegalArgumentException("At least one join method is required");
       this.mdm = mdm;
+      this.joinMethods = EnumSet.copyOf(joinMethods);
    }
    
    /**
@@ -41,7 +52,7 @@ public class HeuristicQueryPlanner implements QueryPlanner {
       
       // Step 1:  Create a TablePlanner object for each mentioned table
       for (String tblname : data.tables()) {
-         TablePlanner tp = new TablePlanner(tblname, data.pred(), tx, mdm);
+         TablePlanner tp = new TablePlanner(tblname, data.pred(), tx, mdm, joinMethods);
          tableplanners.add(tp);
       }
       
