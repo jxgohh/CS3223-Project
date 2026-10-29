@@ -57,12 +57,30 @@ public class EmbeddedResultSet extends ResultSetAdapter {
    }
 
    /**
-    * Returns the integer value of the specified field,
+    * Returns the float value of the specified field,
     * by returning the corresponding value on the saved scan.
+    */
+   public float getFloat(String fldname) throws SQLException {
+      try {
+         fldname = fldname.toLowerCase(); // to ensure case-insensitivity
+         return s.getVal(fldname).asFloat();
+      }
+      catch(RuntimeException e) {
+         conn.rollback();
+         throw new SQLException(e);
+      }
+   }
+
+   /**
+    * Returns the string value of the specified field,
+    * by returning the corresponding value on the saved scan.
+    * A float field is returned as its text, as other JDBC drivers do.
     */
    public String getString(String fldname) throws SQLException {
       try {
          fldname = fldname.toLowerCase(); // to ensure case-insensitivity
+         if (sch.type(fldname) == Types.FLOAT)
+            return String.valueOf(s.getVal(fldname).asFloat());
          return s.getString(fldname);
       }
       catch(RuntimeException e) {
